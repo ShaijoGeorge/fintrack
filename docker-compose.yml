@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  # Web Server (Nginx)
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8081:80" # Changed to 8081 to avoid Apache conflict
+    volumes:
+      - ./backend:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+
+  # PHP Backend (Symfony)
+  php:
+    build: ./docker/php
+    volumes:
+      - ./backend:/var/www/html
+    working_dir: /var/www/html
+
+  # Database (MySQL)
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: fintrack
+    ports:
+      - "3311:3306" # Changed to 3311 to avoid port 3306-3310 conflicts
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+
+  # Frontend (React)
+  frontend:
+    image: node:lts
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    # This command installs packages if missing, then starts the dev server
+    # --host is required to expose the port from inside Docker
+    command: sh -c "npm install && npm run dev -- --host"

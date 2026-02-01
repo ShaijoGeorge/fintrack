@@ -1,0 +1,5 @@
+/backend/vendor/
+/backend/var/
+/backend/.env.local
+/frontend/node_modules/
+/docker/mysql/
