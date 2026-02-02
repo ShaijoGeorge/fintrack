@@ -1,9 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
-
-// A simple dashboard placeholder
-const Dashboard = () => <h1 className="text-3xl text-center mt-10">Welcome to FinTrack Dashboard 🚀</h1>;
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
