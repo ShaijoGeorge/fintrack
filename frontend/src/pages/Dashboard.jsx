@@ -1,17 +1,13 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
-import { AuthContext } from "../context/AuthContext";
 import WalletCard from "../components/WalletCard";
-import { useNavigate } from "react-router-dom";
+import Layout from "../components/Layout"; // Import Layout
 
 const Dashboard = () => {
     const [wallets, setWallets] = useState([]);
     const [name, setName] = useState("");
     const [balance, setBalance] = useState("");
-    const { logout } = useContext(AuthContext); // add logout button
-    const navigate = useNavigate();
 
-    // Fetch Wallets on Page Load
     useEffect(() => {
         fetchWallets();
     }, []);
@@ -22,24 +18,17 @@ const Dashboard = () => {
             setWallets(response.data);
         } catch (error) {
             console.error("Error fetching wallets", error);
-            if (error.response && error.response.status === 401) {
-                logout(); // Logout if token expired
-                navigate("/login");
-            }
         }
     };
 
-    // Handle Form Submit
     const handleAddWallet = async (e) => {
         e.preventDefault();
         if (!name) return;
-
         try {
             await api.post("/wallets", {
                 name: name,
                 balance: parseFloat(balance) || 0
             });
-            // Clear form and refresh list
             setName("");
             setBalance("");
             fetchWallets();
@@ -48,54 +37,34 @@ const Dashboard = () => {
         }
     };
 
-    return (
-        <div className="min-h-screen bg-gray-50 p-8">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-800">My Dashboard</h1>
-                <button 
-                    onClick={() => { logout(); navigate("/login"); }}
-                    className="text-red-500 hover:text-red-700 font-medium"
-                >
-                    Logout
-                </button>
-            </div>
+    // Inline Styles for Dashboard specifics
+    const gridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' };
+    const formCardStyle = { padding: '1.5rem', backgroundColor: '#f3f4f6', border: '2px dashed #d1d5db', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' };
+    const inputStyle = { width: '100%', padding: '0.5rem', marginBottom: '0.75rem', borderRadius: '0.375rem', border: '1px solid #d1d5db' };
+    const addBtnStyle = { width: '100%', backgroundColor: '#2563eb', color: 'white', padding: '0.5rem', borderRadius: '0.375rem', border: 'none', cursor: 'pointer', fontWeight: '500' };
 
-            {/* Wallet Section */}
-            <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-700 mb-4">My Wallets</h2>
+    return (
+        <Layout>
+            <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '2rem' }}>My Dashboard</h1>
+
+            <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#374151', marginBottom: '1rem' }}>My Wallets</h2>
                 
-                {/* Grid Layout for Wallets */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div style={gridStyle}>
                     {wallets.map((wallet) => (
                         <WalletCard key={wallet.id} name={wallet.name} balance={wallet.balance} />
                     ))}
                     
-                    {/* Simple Add Wallet Card (Inline Form) */}
-                    <div className="p-6 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex flex-col justify-center">
-                        <form onSubmit={handleAddWallet} className="space-y-3">
-                            <input 
-                                type="text" 
-                                placeholder="Wallet Name (e.g. SBI)" 
-                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                            />
-                            <input 
-                                type="number" 
-                                placeholder="Initial Balance" 
-                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={balance}
-                                onChange={(e) => setBalance(e.target.value)}
-                            />
-                            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-                                + Add Wallet
-                            </button>
+                    <div style={formCardStyle}>
+                        <form onSubmit={handleAddWallet}>
+                            <input type="text" placeholder="Wallet Name" style={inputStyle} value={name} onChange={(e) => setName(e.target.value)} required />
+                            <input type="number" placeholder="Initial Balance" style={inputStyle} value={balance} onChange={(e) => setBalance(e.target.value)} />
+                            <button type="submit" style={addBtnStyle}>+ Add Wallet</button>
                         </form>
                     </div>
                 </div>
             </div>
-        </div>
+        </Layout>
     );
 };
 
